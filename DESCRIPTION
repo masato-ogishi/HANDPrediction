@@ -1,0 +1,45 @@
+Package: HANDPrediction
+Type: Package
+Title: HAND prediction from HIV envelope genetic signatures
+Version: 0.0.0.9000
+Author: Masato Ogishi
+Maintainer: Masato Ogishi <oogishi-tky@umin.ac.jp>
+Description: HAND is a neurocognitive dysfunction observed in the cource of chronic HIV infections. Currently HAND is diagnosed by exclusion, and the requirement to exclude other mimicking conditions such as encephalitis makes accurate diagnosis of HAND in resource-limited settings unfeasible. 
+    Therefore, prediction of HAND status from the genetic signatures reflecting the intrahost HIV quasispecies would significantly benefit relevant clinical practices especially in resource-limited settings.
+    Here, we developped an optimized machine learning framework that yields far better predictive performance than conventional methodologies.
+Depends: R (>= 3.4.0) 
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Imports: ReporteRs (>= 0.8.8),
+    caret (>= 6.0-76),
+    dplyr (>= 0.7.1),
+    purrr,
+    rpanel,
+    seqinr,
+    stringr (>= 1.2.0),
+    tableone,
+    stringdist,
+    ggplot2,
+    ape,
+    ggtree,
+    gridExtra,
+    DescTools,
+    Rmisc,
+    tidyr,
+    RColorBrewer,
+    data.table,
+    magrittr,
+    optimbase,
+    scales,
+    Rtsne,
+    tcltk,
+    ggraph,
+    igraph,
+    grid,
+    ggthemes,
+    googleVis,
+    randomForest,
+    tibble,
+    ggsci

@@ -1,0 +1,582 @@
+---
+title: "Molecular stratification of HAND from HIV env genetic signatures."
+author: "Masato Ogishi"
+date: '`r format(Sys.time(), "%Y/%m/%d %H:%M")`'
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    theme: default
+    toc: yes
+    toc_depth: 3
+  word_document:
+    fig_caption: yes
+    reference_docx: default
+    toc: yes
+---
+
+# Working environment
+
+## Knitr options.
+```{r, setup}
+knitr::opts_chunk$set(results="hide")
+knitr::opts_chunk$set(echo=T)
+knitr::opts_chunk$set(eval=T)
+knitr::opts_chunk$set(tidy=F)
+knitr::opts_chunk$set(warning=F)
+knitr::opts_chunk$set(error=F)
+knitr::opts_chunk$set(message=F)
+```
+
+## R options.
+```{r}
+# Enable parallel computing
+library(doParallel)
+cl <- makePSOCKcluster(6)
+registerDoParallel(cl)
+
+# Avoid exponential expressions
+options(scipen=100)
+```
+
+## Data and packages.
+```{r}
+## load(file="HANDPrediction_Workspace.RData")
+
+# Packages
+library(devtools)
+load_all() # library(HANDPrediction)
+library(tidyverse)
+library(RColorBrewer)
+library(ggsci)
+library(googleVis)
+library(caret)
+```
+
+# Data
+
+## Import & combine the sequence alignment and metadata.
+```{r}
+df.hand <- dataImportAndCombine(
+  fileName.Alignment.FASTA=system.file("C2V3C3_Metadataset_AA.fasta", package="HANDPrediction"),
+  fileName.HIVNeuroMetadata.CSV=system.file("Metadataset.csv", package="HANDPrediction"),
+  fileName.SampleTissueCategoryDesignSheet.CSV=system.file(
+    "Metadataset_SampleTissue_DesignSheet.csv", package="HANDPrediction"
+    ),
+  colName.SequenceID="Accession",
+  colName.Sample.Tissue="Sample.Tissue",
+  colName.Clinical.Status="Clinical.Status"
+) %>%
+  dplyr::filter(Clinical.Status %in% c("HAND", "NonHAND")) %>%
+  dplyr::mutate(Clinical.Status=factor(Clinical.Status, levels=c("HAND", "NonHAND", "HIVE", "NPD")))
+df.others <- dataImportAndCombine(
+  fileName.Alignment.FASTA=system.file("C2V3C3_Metadataset_AA.fasta", package="HANDPrediction"),
+  fileName.HIVNeuroMetadata.CSV=system.file("Metadataset.csv", package="HANDPrediction"),
+  fileName.SampleTissueCategoryDesignSheet.CSV=system.file(
+    "Metadataset_SampleTissue_DesignSheet.csv", package="HANDPrediction"
+    ),
+  colName.SequenceID="Accession",
+  colName.Sample.Tissue="Sample.Tissue",
+  colName.Clinical.Status="Clinical.Status"
+) %>%
+  dplyr::filter(Clinical.Status %in% c("HIVE", "NPD")) %>%
+  dplyr::mutate(Clinical.Status=factor(Clinical.Status, levels=c("HAND", "NonHAND", "HIVE", "NPD")))
+df.all <- dplyr::bind_rows(df.hand, df.others)
+```
+
+## Create a summary table.
+```{r, results="markdown"}
+tableOne.hand <- combinedDatasetSummaryTable(
+  combinedDataset=df.all, 
+  strataColName="Clinical.Status",
+  varColNamesString="Patient.Sex|Georegion|Sample.Tissue.Category|Viral.load|CD4.count|Number.of.patient.seqs",
+  factorColNamesString="Patient.Sex|Georegion|Sample.Tissue.Category",
+  nonNormalColNameString="Viral.load|CD4.count|Number.of.patient.seqs"
+)
+combinedDatasetSummaryTable.Export(
+  tableOne.hand,
+  outputFileName="./results/SupplementaryTable1.docx"
+)
+```
+
+## Phylogenetic analysis.
+```{r}
+phylo_colors <- list(brewer.pal(4, "Set1"), c(brewer.pal(3, "Dark2"), "grey25"))
+ggPhyloTree.Mirror(
+  tree.newick.file=system.file("C2V3C3_Metadataset_AA_PhyloTree.newick", package="HANDPrediction"), 
+  combinedDataset=df.all, 
+  groupLabelNames=c("Clinical.Status", "Sample.Tissue.Category"),
+  groupVarNamesList=list(c("HAND", "NonHAND", "HIVE", "NPD"), c("CNS", "Blood", "Lymph", "Others")),
+  colorSetList=phylo_colors, tipped=F
+)
+saveCurrentGraphicPDF("./figures/SupplementaryFigure1.pdf", width=8, height=6)
+```
+
+# Prediction of HAND status through machine learning
+
+## Preparation of machine-learning-ready data.
+```{r}
+ML_Matrix <- machineLearning.Matrix(
+  sequences=df.hand$"Sequence.AA", 
+  analysisType="AAIndex", 
+  aaIndexType="physicochemical", 
+  normalized=T
+) 
+ML_Data <- machineLearning.DataFormat(
+  ml.matrix=ML_Matrix,
+  ml.metadata=df.hand,
+  colNames.from=c("Reference_PMID","LANL_Patient.Id","Clinical.Status","Sample.Tissue.Category"), 
+  colNames.to=c("StudyID","PatientID","NeuroOutcome","SampleTissue"), 
+  outcomeLabelName="NeuroOutcome", 
+  sourceLabelName="SampleTissue", 
+  pp="internal"
+)
+```
+
+## Machine learning options.
+```{r}
+ML_Algorithms <- list("svmRadial", "rf", "gbm", "xgbLinear", "xgbTree")
+ML_AlgorithmLabels <- list("SVM", "RF", "GBM", "XGBL", "XGBT")
+ML_Options <- trainControl(
+  method="repeatedcv", number=3, repeats=10, savePredictions="final", verboseIter=F, classProbs=T
+)
+```
+
+## Comparison of various classifiers trained with all features.
+```{r}
+ML_ALL_Bootstrap <- machineLearning.Comparison.Bootstrap(
+  ml.data=ML_Data$"MLDataFrame", 
+  ml.metadata=ML_Data$"MLMetadataDF", 
+  holdoutTrainingRatio=0.8,
+  outcomeLabelName="NeuroOutcome", 
+  patientIDLabelName="PatientID",
+  algorithmList=ML_Algorithms, 
+  algorithmLabelList=ML_AlgorithmLabels, 
+  trainControlOptions=ML_Options,
+  seedList=c(1, 12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789)
+)
+write.csv(ML_ALL_Bootstrap$MLStatDF.Summary, file="./results/SupplementaryTable2.csv", row.names=F)
+Fig.1A <- ML_ALL_Bootstrap$"AccuracyPlot"
+```
+
+## The best stacked classifier trained with all features.
+```{r}
+ML_ALL_BestSeed <- ML_ALL_Bootstrap$MLStatDF %>% dplyr::filter(Algorithm=="Stack") %>%
+  DescTools::Sort(ord=c("Accuracy","AccuracyLower","AccuracyUpper"), decreasing=T) %>% (function(d){d[["RandomSeed"]][1]})
+ML_ALL_Best <- machineLearning.Comparison(
+  ml.data=ML_Data$"MLDataFrame", 
+  ml.metadata=ML_Data$"MLMetadataDF", 
+  holdoutTrainingRatio=0.8,
+  outcomeLabelName="NeuroOutcome", 
+  patientIDLabelName="PatientID",
+  algorithmList=ML_Algorithms, 
+  algorithmLabelList=ML_AlgorithmLabels, 
+  trainControlOptions=ML_Options,
+  seed=ML_ALL_BestSeed
+)
+```
+
+## Feature importance analysis.
+```{r}
+ML_ImportantFeatures <- machineLearning.FeatureImportanceAnalysis(
+  ml.data=ML_Data$"MLDataFrame",
+  outcomeLabelName="NeuroOutcome",
+  modelList=ML_ALL_Best$"MLModelList"[-length(ML_Algorithms)-1],
+  outputFileName.DOCX="./results/SupplementaryTable3.docx",
+  xLabel="HAND Status",
+  yLabel="Z-score",
+  colorSet=brewer.pal(3, "Set1")[2:1]
+)
+Fig.S2A <- ML_ImportantFeatures$"ViolinPlot"
+Fig.S2B <- machineLearning.ResidueAAIndexDualPlot(
+  featureSet=ML_ImportantFeatures$"MostImportantFeatures", 
+  sequences=df.hand$"Sequence.AA", 
+  seqWeights=df.hand$"Number.of.patient.seqs",
+  outcomes=df.hand$"Clinical.Status", 
+  xLabel="Amino Acid Residue", 
+  yLabel1="Residue Frequency",
+  yLabel2="Normalized AAIndex Value",
+  legendLabel="HAND Status", 
+  colorSet=brewer.pal(3, "Set1")[1:2]
+)
+Fig.S2 <- cowplot::plot_grid(Fig.S2A, Fig.S2B, labels="AUTO", label_size=20, ncol=1, align="none")
+savePDF(Fig.S2, "./figures/SupplementaryFigure2.pdf", width=12, height=9)
+```
+
+## Elaborate the classifiers by stepwise feature reduction.
+```{r}
+ML_FeatureReduction <- machineLearning.StepwiseFeatureReduction(
+  featureSet=ML_ImportantFeatures$"MostImportantFeatures",
+  ml.data=ML_Data$"MLDataFrame",
+  ml.metadata=ML_Data$"MLMetadataDF", 
+  holdoutTrainingRatio=0.8,
+  outcomeLabelName="NeuroOutcome", 
+  patientIDLabelName="PatientID",
+  algorithmList=ML_Algorithms, 
+  algorithmLabelList=ML_AlgorithmLabels, 
+  trainControlOptions=ML_Options,
+  seedList=c(1, 12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789)
+)
+saveRDS(ML_FeatureReduction, "./results/StepwiseFeatureReduction.rds")
+write.csv(ML_FeatureReduction$StepwiseStatSummaryDF, file="./results/SupplementaryTable4.csv", row.names=F)
+```
+
+## Re-train the classifier with the minimal set of the most important features.
+```{r}
+ML_Data$"MLDataFrame_Minimum" <- dplyr::select(
+  ML_Data$"MLDataFrame", 
+  dplyr::matches(paste0(c("NeuroOutcome", ML_FeatureReduction$"MostImportantFeatures"), collapse="|"))
+) 
+ML_Minimum_Bootstrap <- machineLearning.Comparison.Bootstrap(
+  ml.data=ML_Data$"MLDataFrame_Minimum", 
+  ml.metadata=ML_Data$"MLMetadataDF", 
+  holdoutTrainingRatio=0.8,
+  outcomeLabelName="NeuroOutcome", 
+  patientIDLabelName="PatientID",
+  algorithmList=ML_Algorithms, 
+  algorithmLabelList=ML_AlgorithmLabels, 
+  trainControlOptions=ML_Options,
+  seedList=c(1, 12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789)
+)
+write.csv(ML_Minimum_Bootstrap$MLStatDF.Summary, file="./results/SupplementaryTable5.csv", row.names=F)
+Fig.1B <- ML_Minimum_Bootstrap$"AccuracyPlot"
+Fig.1 <- cowplot::plot_grid(Fig.1A, Fig.1B, labels="AUTO", label_size=20, nrow=1, align="none")
+savePDF(Fig.1, "./figures/Figure1.pdf", w=10, h=5)
+```
+
+## The best stacked classifier with the optimized feature set.
+```{r}
+ML_Minimum_BestSeed <- ML_Minimum_Bootstrap$MLStatDF %>% dplyr::filter(Algorithm=="Stack") %>%
+  DescTools::Sort(ord=c("Accuracy","AccuracyLower","AccuracyUpper"), decreasing=T) %>% (function(d){d[["RandomSeed"]][1]})
+ML_Minimum_Best <- machineLearning.Comparison(
+  ml.data=ML_Data$"MLDataFrame_Minimum", 
+  ml.metadata=ML_Data$"MLMetadataDF", 
+  holdoutTrainingRatio=0.8,
+  outcomeLabelName="NeuroOutcome", 
+  patientIDLabelName="PatientID",
+  algorithmList=ML_Algorithms, 
+  algorithmLabelList=ML_AlgorithmLabels, 
+  trainControlOptions=ML_Options,
+  seed=ML_Minimum_BestSeed
+)
+ML_Minimum_Best_Classifiers <- list()
+ML_Minimum_Best_Classifiers$"MLModelList" <- ML_Minimum_Best$"MLModelList"[-length(ML_Algorithms)-1]
+ML_Minimum_Best_Classifiers$"MLStackingModel" <- ML_Minimum_Best$"MLModelList"[[length(ML_Algorithms)+1]]
+```
+
+## The most important features for the prediction of HAND status.
+```{r}
+ML_Minimum_Features <- machineLearning.FeatureImportanceAnalysis(
+  ml.data=ML_Data$"MLDataFrame_Minimum",
+  outcomeLabelName="NeuroOutcome",
+  modelList=ML_Minimum_Best$"MLModelList"[-length(ML_Algorithms)-1],
+  outputFileName.DOCX="./results/SupplementaryTable6.docx",
+  xLabel="HAND Status",
+  yLabel="Z-score",
+  colorSet=brewer.pal(3, "Set1")[2:1]
+)
+Fig.2A <- ML_Minimum_Features$"ViolinPlot"
+Fig.2B <- machineLearning.ResidueAAIndexDualPlot(
+  featureSet=ML_FeatureReduction$"MostImportantFeatures", 
+  sequences=df.hand$"Sequence.AA", 
+  seqWeights=df.hand$"Number.of.patient.seqs",
+  outcomes=df.hand$"Clinical.Status", 
+  xLabel="Amino Acid Residue", 
+  yLabel1="Residue Frequency",
+  yLabel2="Normalized AAIndex Value",
+  legendLabel="HAND Status", 
+  colorSet=brewer.pal(3, "Set1")[1:2]
+)
+Fig.2 <- cowplot::plot_grid(Fig.2A, Fig.2B, labels="AUTO", label_size=20, ncol=1, align="none")
+savePDF(Fig.2, "./figures/Figure2.pdf", width=12, height=8)
+```
+
+## Prediction summary.
+```{r, results="markup"}
+ML_Minimum_Pred <- suppressWarnings(
+  dplyr::bind_rows(
+    dplyr::bind_cols(
+      ML_Minimum_Best$"MLDataFrame_Training",
+      machineLearning.Stacking.Predict(
+        ML_Minimum_Best$"MLDataFrame_Training",
+        modelList=ML_Minimum_Best_Classifiers$"MLModelList",
+        model.stack=ML_Minimum_Best_Classifiers$"MLStackingModel"
+      )
+    ),
+    dplyr::bind_cols(
+      ML_Minimum_Best$"MLDataFrame_Testing",
+      machineLearning.Stacking.Predict(
+        ML_Minimum_Best$"MLDataFrame_Testing",
+        modelList=ML_Minimum_Best_Classifiers$"MLModelList",
+        model.stack=ML_Minimum_Best_Classifiers$"MLStackingModel"
+      )
+    )
+  )
+) %>% dplyr::mutate(Data=factor(Data, levels=c("Train", "Test")))
+caret::confusionMatrix(ML_Minimum_Pred$PredictedOutcome, ML_Minimum_Pred$NeuroOutcome)
+```
+
+## Predicting the HAND status for other neuropshychiatrically impaired cases.
+```{r, results="markup"}
+df.others.pred <- machineLearning.Stacking.Predict(
+  df.others$"Sequence.AA",
+  ml.metadata=df.others,
+  colNames.from=c("Reference_PMID","LANL_Patient.Id","Clinical.Status","Sample.Tissue.Category"), 
+  colNames.to=c("StudyID","PatientID","NeuroOutcome","SampleTissue"), 
+  outcomeLabelName=NULL, sourceLabelName="SampleTissue",
+  pp="external", 
+  pp.by.sequence=ML_Data$"MLDataPreProcessing_BySequence", 
+  pp.by.patient=ML_Data$"MLDataPreProcessing_ByPatient",
+  modelList=ML_Minimum_Best_Classifiers$"MLModelList",
+  model.stack=ML_Minimum_Best_Classifiers$"MLStackingModel"
+)
+df.others.pred$"MLPredDF"
+```
+
+# Molecular stratification of HAND through the minimal set of genetic signatures
+
+## Stratifying "HAND" by means of genetic clustering.
+```{r, results="markup"}
+# Identify clusters from heatmap
+set.seed(1)
+library(ComplexHeatmap)
+hm <- Heatmap(
+  as.matrix(as.data.frame(lapply(
+      dplyr::select(ML_Minimum_Pred, dplyr::contains("AAIndex"), dplyr::contains(".HAND")), 
+      scales::rescale
+    ))), 
+  name="Feature",
+  col=circlize::colorRamp2(c(0, 0.5, 1), c("#56B4E9", "grey90", "#E69F00")),
+  row_dend_reorder=T, 
+  cluster_columns=F,
+  show_column_dend=F,
+  km=8,
+  km_title="C%i",
+  clustering_distance_rows="pearson",
+  gap=unit(2, "mm")
+)
+ha <- rowAnnotation(
+  df=dplyr::select(ML_Minimum_Pred, Data, NeuroOutcome, PredictedOutcome, SampleTissue),
+  col=list(Data=c("Train"="grey10", "Test"="grey90"),
+           NeuroOutcome=c("HAND"=brewer.pal(3, "Set1")[1], 
+                          "NonHAND"=brewer.pal(3, "Set1")[2]),
+           PredictedOutcome=c("HAND"=paste0(brewer.pal(3, "Set1")[1],"90"), 
+                              "NonHAND"=paste0(brewer.pal(3, "Set1")[2],"90")),
+           SampleTissue=c("Blood"=brewer.pal(3, "Dark2")[1], 
+                          "CNS"=brewer.pal(3, "Dark2")[2], 
+                          "Lymph"=brewer.pal(3, "Dark2")[3],
+                          "Others"="grey50"))
+)
+draw(ha + hm, padding=unit(c(40, 2, 2, 2), "mm"), row_dend_side="left", row_sub_title_side="right")
+saveCurrentGraphicPDF("./figures/Figure3A.pdf", width=6, height=8)
+
+# Manually determine HAND-enriched clusters.
+set.seed(1) ## It seems necessary to repeat th edeclaration once again...
+hm.clusters <- row_order(hm)
+names(hm.clusters) <- paste0("C", 1:length(hm.clusters))
+ML_Cluster <- ML_Minimum_Pred %>% dplyr::mutate(Cluster=0)
+for(i in 1:length(hm.clusters)){
+  ML_Cluster[["Cluster"]][hm.clusters[[i]]] <- names(hm.clusters)[i]
+}
+ML_Cluster <- ML_Cluster %>% dplyr::select(Data, StudyID, PatientID, NeuroOutcome, Cluster, dplyr::matches("AAIndex"))
+hm.clusters <- ML_Cluster[["Cluster"]]
+hm.clusters[grep("C2", hm.clusters, value=F)] <- "H1"
+hm.clusters[grep("C3", hm.clusters, value=F)] <- "H2"
+hm.clusters[grep("C6", hm.clusters, value=F)] <- "H3"
+hm.clusters[grep("C8", hm.clusters, value=F)] <- "H4"
+hm.clusters[grep("C1|C4|C5|C7", hm.clusters, value=F)] <- "N"
+ML_Cluster <- ML_Cluster %>% 
+  dplyr::mutate(Cluster=factor(hm.clusters, levels=c("H1","H2","H3","H4","N")))
+
+# Train Random Forest classifier for HAND clusters.
+ML_Cluster_Options <- trainControl(method="repeatedcv", number=3, repeats=10, classProbs=T)
+ML_Cluster_RFModel <- train(Cluster~., dplyr::select(ML_Cluster, Cluster, dplyr::matches("AAIndex")),
+                            method="rf", trControl=ML_Cluster_Options, tuneLength=2)
+ML_Cluster_RFModel
+ggRF(caret_rf_model=ML_Cluster_RFModel$finalModel, num_nodes="median", lastColorGrey=T)
+saveCurrentGraphicPDF("./figures/Figure3B.pdf", width=6, height=6)
+```
+
+## Important amino acids for each of the HAND clusters.
+```{r}
+# Calculate amino acid frequencies per patient
+ML_Data_AA <- machineLearning.DataFormat(
+  ml.matrix=machineLearning.Matrix(df.hand$"Sequence.AA", analysisType="boolian"),
+  ml.metadata=df.hand,
+  colNames.from=c("Reference_PMID","LANL_Patient.Id","Clinical.Status","Sample.Tissue.Category"), 
+  colNames.to=c("StudyID","PatientID","NeuroOutcome","SampleTissue"), 
+  outcomeLabelName="NeuroOutcome", 
+  sourceLabelName="SampleTissue", 
+  pp="none"
+)
+ML_Data_AA <- ML_Data_AA$MLDataFrame %>% dplyr::select(dplyr::matches("_mean"))
+ML_Data_AA <- predict(caret::preProcess(ML_Data_AA, method=c("zv","nzv")), ML_Data_AA)
+
+# Assign HAND clusters
+ML_Data_AA <- data.frame("HANDCluster"=predict(ML_Cluster_RFModel, ML_Data$"MLDataFrame", type="raw"), ML_Data_AA)
+
+# Important amino acids for each of the HAND clusters
+ML_VarImp_AA <- caret::filterVarImp(ML_Data_AA[,-1], ML_Data_AA$"HANDCluster") %>%
+  dplyr::mutate(AA=rownames(.)) %>%
+  tidyr::gather(HANDCluster, Importance, -AA) %>%
+  dplyr::filter(Importance > 0.9) 
+ML_Data_AA <- dplyr::select(ML_Data_AA, HANDCluster, dplyr::one_of(sort(unique(ML_VarImp_AA$AA))))
+
+# Heatmap
+set.seed(1)
+npg_colors <- c(gsub("FF","",pal_npg("nrc")(10)), "#808080")
+hm.aa <- Heatmap(
+  as.matrix(dplyr::select(ML_Data_AA, -HANDCluster)), 
+  name="AA Frequency",
+  col=circlize::colorRamp2(c(0, 0.5, 1), c("#56B4E9", "grey90", "#E69F00")),
+  cluster_columns=F,
+  show_column_dend=F,
+  split=ML_Data_AA$"HANDCluster",
+  gap=unit(2, "mm")
+)
+ha.aa <- rowAnnotation(
+  df=dplyr::select(ML_Data_AA, HANDCluster),
+  col=list(HANDCluster=c("H1"=npg_colors[1], "H2"=npg_colors[2], "H3"=npg_colors[3], 
+                         "H4"=npg_colors[4],"N"=npg_colors[11]))
+)
+draw(ha.aa + hm.aa, padding=unit(c(2, 2, 2, 2), "mm"), row_sub_title_side="left")
+saveCurrentGraphicPDF("./figures/SupplementaryFigure3.pdf", width=6, height=8)
+```
+
+## Characterize the HAND clusters by referencing the HAND database.
+```{r}
+df.handdb <- dataImportAndCombine(
+  fileName.Alignment.FASTA=system.file("C2V3C3_HANDDatabase_AA.fasta", package="HANDPrediction"),
+  fileName.HIVNeuroMetadata.CSV=system.file("HANDDatabase.csv", package="HANDPrediction"),
+  fileName.SampleTissueCategoryDesignSheet.CSV=system.file(
+    "HANDDatabase_SampleTissue_DesignSheet.csv", package="HANDPrediction"
+    ),
+  colName.SequenceID="Sequence..Accession.Number",
+  colName.Sample.Tissue="Sampling..Tissue",
+  colName.Clinical.Status="Patient..HAND.Status"
+)
+ML_Data_HANDDB <- machineLearning.DataFormat(
+  ml.matrix=machineLearning.Matrix(df.handdb$"Sequence.AA"),
+  ml.metadata=df.handdb,
+  colNames.from=c("SEQUENCE.PMID","Patient..Code","Clinical.Status","Sample.Tissue.Category"), 
+  colNames.to=c("StudyID","PatientID","HANDStatus","SampleTissue"), 
+  outcomeLabelName=NULL, sourceLabelName="SampleTissue",
+  pp="external", 
+  pp.by.sequence=ML_Data$"MLDataPreProcessing_BySequence", 
+  pp.by.patient=ML_Data$"MLDataPreProcessing_ByPatient"
+)
+ML_Pred_HANDDB <- dplyr::bind_cols(
+  ML_Data_HANDDB$"MLMetadataDF",
+  data.frame("PredictedOutcome"=predict(ML_Cluster_RFModel, ML_Data_HANDDB$"MLDataFrame", type="raw"),
+             predict(ML_Cluster_RFModel, ML_Data_HANDDB$"MLDataFrame", type="prob"))
+)
+ML_Pred_HANDDB_Sankey <- ML_Pred_HANDDB %>% 
+  dplyr::filter(HANDStatus %in% c("No HAND","HAD","HAD + HIVE","HIVE"))
+sankey_colors <- npg_colors[c(8,3,4,11,5,1,2,6,11)]
+gvSankey(
+  reference=ML_Pred_HANDDB_Sankey$"HANDStatus", 
+  prediction=ML_Pred_HANDDB_Sankey$"PredictedOutcome",
+  colors_link=sankey_colors
+)
+```
+
+# Estimating the global burden of HAND
+
+## Los Alamos HIV Sequence Database.
+```{r}
+df.lanl <- dataImportAndCombine(
+  fileName.Alignment.FASTA=system.file("C2V3C3_LANL_AA.fasta", package="HANDPrediction"),
+  fileName.HIVNeuroMetadata.CSV=system.file("LANL.csv", package="HANDPrediction"),
+  fileName.SampleTissueCategoryDesignSheet.CSV=system.file(
+    "LANL_SampleTissue_DesignSheet.csv", package="HANDPrediction"
+    ),
+  colName.SequenceID="Accession",
+  colName.Sample.Tissue="Sample.Tissue"
+)
+ML_Data_LANL <- machineLearning.DataFormat(
+  ml.matrix=machineLearning.Matrix(df.lanl$"Sequence.AA"),
+  ml.metadata=df.lanl,
+  colNames.from=c("Pubmed.ID","Patient.Id","Sample.Tissue.Category","Georegion","Country","Viral.load","CD4.count"), 
+  colNames.to=c("StudyID","PatientID","SampleTissue","Georegion","Country","ViralLoad","CD4"), 
+  outcomeLabelName=NULL, sourceLabelName="SampleTissue",
+  pp="external", 
+  pp.by.sequence=ML_Data$"MLDataPreProcessing_BySequence", 
+  pp.by.patient=ML_Data$"MLDataPreProcessing_ByPatient"
+)
+ML_Pred_LANL <- dplyr::bind_cols(
+  ML_Data_LANL$"MLMetadataDF",
+  data.frame("PredictedOutcome"=predict(ML_Cluster_RFModel, ML_Data_LANL$"MLDataFrame", type="raw"),
+             predict(ML_Cluster_RFModel, ML_Data_LANL$"MLDataFrame", type="prob"))
+)
+```
+
+## Global burden of HAND.
+```{r}
+# Pie chart.
+Fig.5A <- ggPie(ML_Pred_LANL$PredictedOutcome, colorSet=npg_colors[c(1:4,11)]) + theme(legend.position="top")
+
+# Bar chart split by georegions.
+ML_Pred_LANL_Georegion <- ML_Pred_LANL
+ML_Pred_LANL_Georegion$"Georegion" <- as.character(ML_Pred_LANL_Georegion$"Georegion")
+ML_Pred_LANL_Georegion$"Georegion"[which(ML_Pred_LANL_Georegion$"Georegion"=="Asia")] <- "Asia/Middle-East/Oceania"
+ML_Pred_LANL_Georegion$"Georegion"[which(ML_Pred_LANL_Georegion$"Georegion"=="Middle-East")] <- "Asia/Middle-East/Oceania"
+ML_Pred_LANL_Georegion$"Georegion"[which(ML_Pred_LANL_Georegion$"Georegion"=="Oceania")] <- "Asia/Middle-East/Oceania"
+ML_Pred_LANL_Georegion$"Georegion"[which(ML_Pred_LANL_Georegion$"Georegion"=="AFR SSA")] <- "Sub-Saharan Africa"
+ML_Pred_LANL_Georegion <- ML_Pred_LANL_Georegion %>% 
+  dplyr::group_by(Georegion, PredictedOutcome) %>%
+  dplyr::summarise(Count=n()) %>%
+  dplyr::mutate(Freq=Count/sum(Count)) %>%
+  dplyr::filter(Georegion != "South America")
+Fig.5B <- ggplot(ML_Pred_LANL_Georegion, aes(x=Georegion, y=Freq, fill=PredictedOutcome)) +
+  geom_bar(stat="identity", position="fill") + xlab(NULL) + ylab(NULL) +
+  scale_fill_manual(values=npg_colors[c(1:4,11)], guide=guide_legend(title=NULL)) +
+  scale_y_reverse(labels=scales::percent) +
+  coord_flip() +
+  theme_Publication() + theme(legend.position="top", legend.direction="horizontal")
+Fig.5 <- cowplot::plot_grid(Fig.5A, Fig.5B, labels="AUTO", label_size=20, nrow=1, rel_widths=c(3,5), align="none")
+savePDF(Fig.5, "./figures/Figure5.pdf", width=12, height=6)
+```
+
+## Correlation of predicted HAND clusters and HIV-specific parameters.
+```{r, results="markup"}
+options(scipen=0)
+cowplot::plot_grid(
+  ggplot(ML_Pred_LANL, aes(x = PredictedOutcome, y = ViralLoad, fill=PredictedOutcome)) +
+    geom_violin(trim = F) +
+    stat_summary(fun.y=median, geom = "point", color="white", shape = "-", size = 10) +
+    ggsignif::geom_signif(
+      comparisons = as.list(as.data.frame(combn(paste0("H", 1:4), 2), stringsAsFactors=F)),
+      step_increase = 0.075, tip_length = 0, map_signif_level = F
+    ) +
+    xlab(NULL) + ylab("Viral load") + scale_y_log10() +
+    scale_fill_manual(values=npg_colors[c(1:4,11)], guide=guide_legend(title=NULL)) +
+    theme_Publication(),
+  ggplot(ML_Pred_LANL, aes(x = PredictedOutcome, y = CD4,fill=PredictedOutcome)) +
+    geom_violin(trim = F) +
+    stat_summary(fun.y=median, geom = "point", color="white", shape = "-", size = 10) +
+    ggsignif::geom_signif(
+      comparisons = as.list(as.data.frame(combn(paste0("H", 1:4), 2), stringsAsFactors=F)),
+      step_increase = 0.075, tip_length = 0, map_signif_level = F
+    ) +
+    xlab(NULL) + ylab("CD4 T-cell count") + scale_y_log10(breaks=c(10, 100, 1000)) +
+    scale_fill_manual(values=npg_colors[c(1:4,11)], guide=guide_legend(title=NULL)) +
+    theme_Publication(),
+  labels = "AUTO", label_size = 20, nrow = 1, align = "none"
+)
+saveCurrentGraphicPDF("./figures/SupplementaryFigure4.pdf", width=12, height=6)
+pairwise.wilcox.test(ML_Pred_LANL$ViralLoad, ML_Pred_LANL$PredictedOutcome, p.adjust.method = "BH", paired = F)
+pairwise.wilcox.test(ML_Pred_LANL$CD4, ML_Pred_LANL$PredictedOutcome, p.adjust.method = "BH", paired = F)
+```
+
+# Closing
+
+## Session info.
+```{r, results="markup"}
+sessionInfo()
+```
+
+## Save the workspace.
+```{r}
+save.image(file="HANDPrediction_Workspace.RData")
+```
+
