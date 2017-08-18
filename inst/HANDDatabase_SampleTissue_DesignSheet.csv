@@ -1,0 +1,20 @@
+Sample.Tissue,Sample.Tissue.Category
+Blood,Blood
+Bone Marrow,Lymph
+Brain,CNS
+Choroid Plexus,CNS
+Colon,Others
+CSF,CNS
+Diaphragm,Others
+Intestine,Others
+Kidney,Others
+Liver,Others
+Lung,Others
+Lymph Node,Lymph
+Meninges,CNS
+PBMC,Blood
+Plasma,Blood
+Prostate,Others
+Spleen,Lymph
+Stomach,Others
+Unknown Tissue,Others

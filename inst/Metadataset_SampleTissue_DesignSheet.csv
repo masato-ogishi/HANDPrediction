@@ -1,0 +1,21 @@
+Sample.Tissue,Sample.Tissue.Category
+blood,Blood
+brain,CNS
+colon,Others
+CSF,CNS
+diaphragm,Others
+intestine,Others
+kidney,Others
+liver,Others
+lung,Others
+lymph node,Lymph
+meninges,CNS
+PBMC,Blood
+plasma,Blood
+prostate,Others
+seminal cells,Others
+seminal plasma,Others
+serum,Blood
+spinal cord,CNS
+spleen,Lymph
+stomach,Others

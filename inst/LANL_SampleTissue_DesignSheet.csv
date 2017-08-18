@@ -1,0 +1,30 @@
+Sample.Tissue,Sample.Tissue.Category
+blood,Blood
+bone marrow,Lymph
+brain,CNS
+breast milk,Others
+breast milk supernatant,Others
+colon,Others
+CSF,CNS
+diaphragm,Others
+foreskin,Others
+GALT,Others
+intestine,Others
+kidney,Others
+liver,Others
+lymph node,Lymph
+meninges,CNS
+PBMC,Blood
+placenta,Others
+plasma,Blood
+prostate,Others
+seminal cells,Others
+seminal plasma,Others
+serum,Blood
+spleen,Lymph
+stomach,Others
+supernatant,Others
+umbilical cord plasma,Others
+vagina,Others
+vaginal cells,Others
+vaginal fluid,Others
