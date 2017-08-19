@@ -270,7 +270,7 @@ ML_Minimum_Features <- machineLearning.FeatureImportanceAnalysis(
   ml.data=ML_Data$"MLDataFrame_Minimum",
   outcomeLabelName="NeuroOutcome",
   modelList=ML_Minimum_Best$"MLModelList"[-length(ML_Algorithms)-1],
-  outputFileName.DOCX="./results/SupplementaryTable6.docx",
+  outputFileName.DOCX=NULL,
   xLabel="HAND Status",
   yLabel="Z-score",
   colorSet=brewer.pal(3, "Set1")[2:1]
@@ -313,7 +313,13 @@ ML_Minimum_Pred <- suppressWarnings(
     )
   )
 ) %>% dplyr::mutate(Data=factor(Data, levels=c("Train", "Test")))
-caret::confusionMatrix(ML_Minimum_Pred$PredictedOutcome, ML_Minimum_Pred$NeuroOutcome)
+(ML_Minimum_Pred_CM <- caret::confusionMatrix(ML_Minimum_Pred$PredictedOutcome, ML_Minimum_Pred$NeuroOutcome))
+```
+
+## Baysian posterior probabilities.
+```{r}
+Fig.S3 <- bayesianPosteriorProbabilityPlot(confMat=ML_Minimum_Pred_CM)
+savePDF(Fig.S3, "./figures/SupplementaryFigure3.pdf", width=8, height=5)
 ```
 
 ## Predicting the HAND status for other neuropshychiatrically impaired cases.
@@ -440,7 +446,7 @@ ha.aa <- rowAnnotation(
                          "H4"=npg_colors[4],"N"=npg_colors[11]))
 )
 draw(ha.aa + hm.aa, padding=unit(c(2, 2, 2, 2), "mm"), row_sub_title_side="left")
-saveCurrentGraphicPDF("./figures/SupplementaryFigure3.pdf", width=6, height=8)
+saveCurrentGraphicPDF("./figures/SupplementaryFigure4.pdf", width=6, height=8)
 ```
 
 ## Characterize the HAND clusters by referencing the HAND database.
@@ -486,7 +492,7 @@ gvSankey(
 ```{r}
 df.lanl <- dataImportAndCombine(
   fileName.Alignment.FASTA=system.file("C2V3C3_LANL_AA.fasta", package="HANDPrediction"),
-  fileName.HIVNeuroMetadata.CSV=system.file("LANL.csv", package="HANDPrediction"),
+  fileName.HIVNeuroMetadata.CSV=system.file("LANL.zip", package="HANDPrediction"),
   fileName.SampleTissueCategoryDesignSheet.CSV=system.file(
     "LANL_SampleTissue_DesignSheet.csv", package="HANDPrediction"
     ),
@@ -563,7 +569,7 @@ cowplot::plot_grid(
     theme_Publication(),
   labels = "AUTO", label_size = 20, nrow = 1, align = "none"
 )
-saveCurrentGraphicPDF("./figures/SupplementaryFigure4.pdf", width=12, height=6)
+saveCurrentGraphicPDF("./figures/SupplementaryFigure5.pdf", width=12, height=6)
 pairwise.wilcox.test(ML_Pred_LANL$ViralLoad, ML_Pred_LANL$PredictedOutcome, p.adjust.method = "BH", paired = F)
 pairwise.wilcox.test(ML_Pred_LANL$CD4, ML_Pred_LANL$PredictedOutcome, p.adjust.method = "BH", paired = F)
 ```
@@ -579,4 +585,3 @@ sessionInfo()
 ```{r}
 save.image(file="HANDPrediction_Workspace.RData")
 ```
-
