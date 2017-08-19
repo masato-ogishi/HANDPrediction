@@ -189,3 +189,4 @@ machineLearning.Comparison.Bootstrap <- function(..., seedList=1:10){
   # Output
   return(list("MLStatDF"=statDF, "MLStatDF.Summary"=statDF.summary, "StackMeanAccuracy"=ave.acc, "AccuracyPlot"=acc.plot))
 }
+

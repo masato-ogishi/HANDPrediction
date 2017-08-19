@@ -11,7 +11,7 @@ dataImportAndCombine(fileName.Alignment.FASTA, fileName.HIVNeuroMetadata.CSV,
 \arguments{
 \item{fileName.Alignment.FASTA}{A file name of the HIV env sequence alignment in a FASTA format.}
 
-\item{fileName.HIVNeuroMetadata.CSV}{A file name of the metadata in a CSV format.}
+\item{fileName.HIVNeuroMetadata.CSV}{A file name of the metadata in a CSV format. Zip file is also allowed.}
 
 \item{fileName.SampleTissueCategoryDesignSheet.CSV}{A file name of the tissue category design sheet in a CSV format.}
 

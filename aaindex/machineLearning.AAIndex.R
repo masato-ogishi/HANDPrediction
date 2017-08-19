@@ -37,3 +37,4 @@ aaIndexData.all.norm <- dplyr::bind_cols(dplyr::select(aaIndexData.all, aaIndexN
 aaIndexData.pc.norm <- aaIndexData.all.norm %>% dplyr::filter(aaIndexDescription %in% aaIndex.pc)
 
 ## devtools::use_data(aaLetters, aaIndexData.all, aaIndexData.pc, aaIndexData.all.norm, aaIndexData.pc.norm, internal = TRUE, overwrite = TRUE)
+

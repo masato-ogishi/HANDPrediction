@@ -1,5 +1,5 @@
 # Visualize Random Forest model in ggplot
-#' @title Phylogenetic tree colored with metadata.
+#' @title Visualize Random Forest model in ggplot
 #' @param caret_rf_model The final model of the random forest model from caret
 #' @param num_nodes The number of nodes for visualization. Either "smallest", "largest", "median", or an integer.
 #' @param brewerPalName The color palette name in the Brewer palettes.
@@ -21,7 +21,6 @@
 #' @import ggplot2
 #' @export
 #' @rdname ggRF
-#' @author Shirin Glander
 ggRF <- function(caret_rf_model, num_nodes="median",
                  brewerPalName="Set1", lastColorGrey=F){
 

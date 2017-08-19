@@ -1,7 +1,7 @@
 # Load & combine a sequence dataset and a metadata into a single dataframe
 #' @title Load & combine a sequence dataset and a metadata into a single dataframe
 #' @param fileName.Alignment.FASTA A file name of the HIV env sequence alignment in a FASTA format.
-#' @param fileName.HIVNeuroMetadata.CSV A file name of the metadata in a CSV format.
+#' @param fileName.HIVNeuroMetadata.CSV A file name of the metadata in a CSV format. Zip file is also allowed.
 #' @param fileName.SampleTissueCategoryDesignSheet.CSV A file name of the tissue category design sheet in a CSV format.
 #' @param colName.SequenceID The column name representing sequene ID in the metadata.
 #' @param colName.Sample.Tissue The column name representing sample source tissues in the metadata.
@@ -57,7 +57,11 @@ dataImportAndCombine <- function(
   df[["Sequence.AA.VarianceFromHXB2"]] <- editDistanceRatios
 
   # Combine metadata
-  df.meta <- read.csv(fileName.HIVNeuroMetadata.CSV)
+  if(stringr::str_detect(fileName.HIVNeuroMetadata.CSV, stringr::fixed(".zip"))){
+    df.meta <- read.csv(unzip(fileName.HIVNeuroMetadata.CSV))
+  }else{
+    df.meta <- read.csv(fileName.HIVNeuroMetadata.CSV)
+  }
   colnames(df.meta)[grep(colName.SequenceID, colnames(df.meta), value=F)] <- "SequenceID"
   df <- merge(df, df.meta, by="SequenceID", all.x=T, sort=F)
 

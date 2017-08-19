@@ -6,9 +6,9 @@
 #' @param topN An integer indicating how many the most important features are retained.
 #' @param pThreshold A threshold of significance. Features with significantly distinct value distributions between neurological outcomes are considered important.
 #' @param removedVars (Optional) Feature names that should be removed manually.
-#' @param outputFileName.DOCX A file name of a summary table in a Word format.
-#' @param xLabel An x-axis label for the violin plot.
-#' @param yLabel A y-axis label for the violin plot.
+#' @param outputFileName.DOCX (Optional) A file name of a summary table in a Word format.
+#' @param xLabel (Optional) An x-axis label for the violin plot.
+#' @param yLabel (Optional) A y-axis label for the violin plot.
 #' @param colorSet The color set to be used.
 #' @importFrom dplyr %>%
 #' @importFrom DescTools Sort
@@ -39,7 +39,7 @@
 machineLearning.FeatureImportanceAnalysis <- function(
   ml.data, outcomeLabelName,
   modelList, topN=20, pThreshold=0.05, removedVars=c(),
-  outputFileName.DOCX="FeatureImportance.docx",
+  outputFileName.DOCX=NULL,
   xLabel=NULL, yLabel=NULL, colorSet
 ){
   # Screen important features in each model
@@ -81,21 +81,23 @@ machineLearning.FeatureImportanceAnalysis <- function(
   d <- suppressWarnings(dplyr::bind_rows(d.list.pos))
 
   # Export a formatted table to Word
-  no_border=borderProperties(width=0)
-  big_border=borderProperties(width=2)
-  std_border=borderProperties(width=1)
-  table <- FlexTable(d,
-                     header.cell.props=cellProperties(background.color="#003366"),
-                     header.text.props=textBold(color="white"),
-                     add.rownames=T)
-  table <- spanFlexTableRows(table, j="Position", runs=as.character(d$"Position"))
-  table <- spanFlexTableRows(table, j="Algorithm", runs=as.character(paste0(d$"Position",".",d$"Algorithm")))
-  table <- setFlexTableBorders(table, footer=F,
-                               inner.vertical=no_border, inner.horizontal=std_border,
-                               outer.vertical=no_border, outer.horizontal=big_border)
-  doc <- docx( )
-  doc <- addFlexTable(doc, table)
-  writeDoc(doc, file=outputFileName.DOCX)
+  if(!is.null(outputFileName.DOCX)){
+    no_border=borderProperties(width=0)
+    big_border=borderProperties(width=2)
+    std_border=borderProperties(width=1)
+    table <- FlexTable(d,
+                       header.cell.props=cellProperties(background.color="#003366"),
+                       header.text.props=textBold(color="white"),
+                       add.rownames=T)
+    table <- spanFlexTableRows(table, j="Position", runs=as.character(d$"Position"))
+    table <- spanFlexTableRows(table, j="Algorithm", runs=as.character(paste0(d$"Position",".",d$"Algorithm")))
+    table <- setFlexTableBorders(table, footer=F,
+                                 inner.vertical=no_border, inner.horizontal=std_border,
+                                 outer.vertical=no_border, outer.horizontal=big_border)
+    doc <- docx( )
+    doc <- addFlexTable(doc, table)
+    writeDoc(doc, file=outputFileName.DOCX)
+  }
 
   # Collect features regarded as important by two or more algorithms
   d.imp <- d %>%
@@ -251,3 +253,4 @@ machineLearning.ResidueAAIndexDualPlot <- function(
     theme_Publication() +
     theme(legend.position="top", legend.direction="horizontal")
 }
+
