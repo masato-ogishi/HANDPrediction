@@ -21,7 +21,7 @@ devtools::install_github("masato-ogishi/HANDPrediction")
 devtools::install_local("path/to/the/unzipped/folder")
 ```
 
-if you use R 64bit version and encounter an error regarding rJava, please try suggestions below:
+If you use R 64bit version and encounter an error regarding rJava, please try suggestions below:
 1. Make sure you install 64bit version of [JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
 2. Add the Path "C:\Program Files\Java\jdk1.8.0_144\jre\bin\server"
 3. Run the following command.
