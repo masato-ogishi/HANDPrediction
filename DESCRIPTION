@@ -1,7 +1,7 @@
 Package: HANDPrediction
 Type: Package
 Title: HAND prediction from HIV envelope genetic signatures
-Version: 0.0.0.9000
+Version: 0.1.0
 Author: Masato Ogishi
 Maintainer: Masato Ogishi <oogishi-tky@umin.ac.jp>
 Description: HAND is a neurocognitive dysfunction observed in the cource of chronic HIV infections. Currently HAND is diagnosed by exclusion, and the requirement to exclude other mimicking conditions such as encephalitis makes accurate diagnosis of HAND in resource-limited settings unfeasible. 
