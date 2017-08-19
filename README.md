@@ -12,6 +12,13 @@ Installation
 ---------------------------
 1. Users should install the latest version (>=3.4.1) of [R](https://cran.r-project.org/bin/windows/base/) and [RStudio](https://www.rstudio.com/products/rstudio/download2/) in advance.
 2. Install the package <i>HANDPrediction</i>.  
+``` r
+if(!require(devtools)) install.packages("devtools")
+devtools::install_github("masato-ogishi/HANDPrediction")
+
+# Alternatively, please download this repository as a Zip file, unzip it to the directory you want, and run the following command.
+devtools::install_local("path/to/the/unzipped/folder")
+```
 
 Reference
 ---------------------------
