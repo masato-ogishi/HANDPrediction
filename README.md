@@ -21,6 +21,15 @@ devtools::install_github("masato-ogishi/HANDPrediction")
 devtools::install_local("path/to/the/unzipped/folder")
 ```
 
+if you use R 64bit version and encounter an error regarding rJava, please try suggestions below:
+1. Make sure you install 64bit version of [JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
+2. Add the Path "C:\Program Files\Java\jdk1.8.0_144\jre\bin\server"
+3. Run the following command.
+``` r
+if (Sys.getenv("JAVA_HOME")!="")
+  Sys.setenv(JAVA_HOME="")
+```
+
 Reference
 ---------------------------
 - Masato Ogishi and Hiroshi Yotsuyanagi. Stratification of HIV-associated neurocognitive disorder (HAND) by three genetic features. (Manuscript submitted)
