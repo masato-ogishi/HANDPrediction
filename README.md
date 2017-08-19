@@ -10,8 +10,9 @@ This is the R package for the prediction of the probability of HAND for given pa
 
 Installation
 ---------------------------
-1. Users should install the latest version (>=3.4.1) of [R](https://cran.r-project.org/bin/windows/base/) and [RStudio](https://www.rstudio.com/products/rstudio/download2/) in advance.
-2. Install the package <i>HANDPrediction</i>.  
+1. Install the latest version of [R](https://cran.r-project.org/bin/windows/base/) (>=3.4.1) and [RStudio](https://www.rstudio.com/products/rstudio/download2/).
+2. Upgrade [Bioconductor](https://www.bioconductor.org/install/) to the latest version (>=3.5).
+3. Install the package <i>HANDPrediction</i>.  
 ``` r
 if(!require(devtools)) install.packages("devtools")
 devtools::install_github("masato-ogishi/HANDPrediction")
