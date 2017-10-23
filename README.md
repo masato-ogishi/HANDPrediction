@@ -32,4 +32,4 @@ if (Sys.getenv("JAVA_HOME")!="")
 
 Reference
 ---------------------------
-- Masato Ogishi and Hiroshi Yotsuyanagi. Stratification of HIV-associated neurocognitive disorder (HAND) by three genetic features. (Manuscript submitted)
+- Masato Ogishi and Hiroshi Yotsuyanagi. Prediction of HIV-associated neurocognitive disorder (HAND) from three genetic features of envelope gp120 glycoprotein. (Manuscript under review)
