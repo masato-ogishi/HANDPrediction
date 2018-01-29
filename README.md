@@ -21,15 +21,6 @@ devtools::install_github("masato-ogishi/HANDPrediction")
 devtools::install_local("path/to/the/unzipped/folder")
 ```
 
-If you use R 64bit version and encounter an error regarding rJava, please try suggestions below:
-1. Make sure you install a 64bit version of [JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
-2. Add following to teh system path: "C:\Program Files\Java\jdk1.8.0_144\jre\bin\server"
-3. Run the following command.
-``` r
-if (Sys.getenv("JAVA_HOME")!="")
-  Sys.setenv(JAVA_HOME="")
-```
-
 Reference
 ---------------------------
-- Masato Ogishi and Hiroshi Yotsuyanagi. Prediction of HIV-associated neurocognitive disorder (HAND) from three genetic features of envelope gp120 glycoprotein. Retrovirology. (In press)
+- Masato Ogishi and Hiroshi Yotsuyanagi. Prediction of HIV-associated neurocognitive disorder (HAND) from three genetic features of envelope gp120 glycoprotein. Retrovirology. 2018 Jan 27;15(1):12. doi: 10.1186/s12977-018-0401-x.
