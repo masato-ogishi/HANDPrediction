@@ -4,8 +4,12 @@
 \alias{ggRF}
 \title{Visualize Random Forest model in ggplot}
 \usage{
-ggRF(caret_rf_model, num_nodes = "median", brewerPalName = "Set1",
-  lastColorGrey = F)
+ggRF(
+  caret_rf_model,
+  num_nodes = "median",
+  brewerPalName = "Set1",
+  lastColorGrey = F
+)
 }
 \arguments{
 \item{caret_rf_model}{The final model of the random forest model from caret}
@@ -15,4 +19,7 @@ ggRF(caret_rf_model, num_nodes = "median", brewerPalName = "Set1",
 \item{brewerPalName}{The color palette name in the Brewer palettes.}
 
 \item{lastColorGrey}{Logical. Whether the last category should be colored as grey.}
+}
+\description{
+Visualize Random Forest model in ggplot
 }

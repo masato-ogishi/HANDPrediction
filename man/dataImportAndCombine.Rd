@@ -4,9 +4,14 @@
 \alias{dataImportAndCombine}
 \title{Load & combine a sequence dataset and a metadata into a single dataframe}
 \usage{
-dataImportAndCombine(fileName.Alignment.FASTA, fileName.HIVNeuroMetadata.CSV,
-  fileName.SampleTissueCategoryDesignSheet.CSV, colName.SequenceID,
-  colName.Sample.Tissue, colName.Clinical.Status = NULL)
+dataImportAndCombine(
+  fileName.Alignment.FASTA,
+  fileName.HIVNeuroMetadata.CSV,
+  fileName.SampleTissueCategoryDesignSheet.CSV,
+  colName.SequenceID,
+  colName.Sample.Tissue,
+  colName.Clinical.Status = NULL
+)
 }
 \arguments{
 \item{fileName.Alignment.FASTA}{A file name of the HIV env sequence alignment in a FASTA format.}
@@ -20,4 +25,7 @@ dataImportAndCombine(fileName.Alignment.FASTA, fileName.HIVNeuroMetadata.CSV,
 \item{colName.Sample.Tissue}{The column name representing sample source tissues in the metadata.}
 
 \item{colName.Clinical.Status}{(Optional) The column name representing neurological outcomess in the metadata.}
+}
+\description{
+Load & combine a sequence dataset and a metadata into a single dataframe
 }

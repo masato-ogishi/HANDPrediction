@@ -5,12 +5,20 @@
 \alias{bayesianPosteriorProbabilityPlot}
 \title{Visualize the distribution of Bayesian posterior probabilities in ggplot}
 \usage{
-bayesianPosteriorProbability(predictedOutcomes = c("HAND", "NonHAND"),
-  priorProbHAND = 0.33, confMat = NULL, sensitivity = NULL,
-  specificity = NULL)
+bayesianPosteriorProbability(
+  predictedOutcomes = c("HAND", "NonHAND"),
+  priorProbHAND = 0.33,
+  confMat = NULL,
+  sensitivity = NULL,
+  specificity = NULL
+)
 
-bayesianPosteriorProbabilityPlot(predictedOutcomes = c("HAND", "NonHAND"),
-  confMat = NULL, sensitivity = NULL, specificity = NULL)
+bayesianPosteriorProbabilityPlot(
+  predictedOutcomes = c("HAND", "NonHAND"),
+  confMat = NULL,
+  sensitivity = NULL,
+  specificity = NULL
+)
 }
 \arguments{
 \item{predictedOutcomes}{The prediction result. Either "HAND", "NonHAND", or both.}
@@ -22,4 +30,7 @@ bayesianPosteriorProbabilityPlot(predictedOutcomes = c("HAND", "NonHAND"),
 \item{sensitivity}{(Optional) The sensitivity of the stacked classifier.}
 
 \item{specificity}{(Optional) The specificity of the stacked classifier.}
+}
+\description{
+Visualize the distribution of Bayesian posterior probabilities in ggplot
 }

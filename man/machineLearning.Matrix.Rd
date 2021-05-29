@@ -14,12 +14,20 @@ aaseqToBoolian.batch(sequences, gapPositions = c(125))
 
 aaseqToAAIndex(sequence, aaIndexType = "all", normalized = T)
 
-aaseqToAAIndex.batch(sequences, gapPositions = c(125), aaIndexType = "all",
-  normalized = T)
+aaseqToAAIndex.batch(
+  sequences,
+  gapPositions = c(125),
+  aaIndexType = "all",
+  normalized = T
+)
 
-machineLearning.Matrix(sequences, gapPositions = c(125),
-  analysisType = "AAIndex", aaIndexType = "physicochemical",
-  normalized = T)
+machineLearning.Matrix(
+  sequences,
+  gapPositions = c(125),
+  analysisType = "AAIndex",
+  aaIndexType = "physicochemical",
+  normalized = T
+)
 }
 \arguments{
 \item{sequence}{An amino acid sequence of HIV C2V3C3 region.}
@@ -33,4 +41,7 @@ machineLearning.Matrix(sequences, gapPositions = c(125),
 \item{normalized}{Logical. Whether AAIndex values are rescaled to [0,1] range.}
 
 \item{analysisType}{An indicator for the type of  analysis. Currently, "boolian" and "AAIndex" are implemented.}
+}
+\description{
+Convert an amino acid sequence to a numerical matrix.
 }

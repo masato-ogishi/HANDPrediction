@@ -11,6 +11,9 @@ ggPie(labelSet, colorSet)
 
 \item{colorSet}{The color set to be used.}
 }
+\description{
+Pie chart in ggplot.
+}
 \author{
 stack overflow
 }

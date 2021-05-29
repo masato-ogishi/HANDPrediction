@@ -13,3 +13,6 @@ gvSankey(reference, prediction, colors_link)
 
 \item{colors_link}{A set of colors.}
 }
+\description{
+Comparison of reference and prediction in sankey plot using googleVis API.
+}

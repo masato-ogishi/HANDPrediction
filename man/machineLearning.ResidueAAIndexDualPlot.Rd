@@ -4,9 +4,17 @@
 \alias{machineLearning.ResidueAAIndexDualPlot}
 \title{Residue frequencies and AAIndex values at specified important positions.}
 \usage{
-machineLearning.ResidueAAIndexDualPlot(featureSet, sequences,
-  seqWeights = NULL, outcomes, xLabel = NULL, yLabel1 = NULL,
-  yLabel2 = NULL, legendLabel = NULL, colorSet)
+machineLearning.ResidueAAIndexDualPlot(
+  featureSet,
+  sequences,
+  seqWeights = NULL,
+  outcomes,
+  xLabel = NULL,
+  yLabel1 = NULL,
+  yLabel2 = NULL,
+  legendLabel = NULL,
+  colorSet
+)
 }
 \arguments{
 \item{featureSet}{An important feature set.}
@@ -26,4 +34,7 @@ machineLearning.ResidueAAIndexDualPlot(featureSet, sequences,
 \item{legendLabel}{A legend label.}
 
 \item{colorSet}{The color set to be used.}
+}
+\description{
+Residue frequencies and AAIndex values at specified important positions.
 }

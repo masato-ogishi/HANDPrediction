@@ -8,14 +8,29 @@
 \usage{
 machineLearning.Stacking.Predict(X, ...)
 
-machineLearning.Stacking.Predict_From_PreprocessedDataset(ml.data.predict,
-  modelList, model.stack)
+machineLearning.Stacking.Predict_From_PreprocessedDataset(
+  ml.data.predict,
+  modelList,
+  model.stack
+)
 
-machineLearning.Stacking.Predict_From_Metadataset(sequences,
-  gapPositions = c(125), analysisType = "AAIndex",
-  aaIndexType = "physicochemical", normalized = T, ml.metadata,
-  colNames.from, colNames.to, outcomeLabelName, sourceLabelName,
-  pp = "external", pp.by.sequence, pp.by.patient, modelList, model.stack)
+machineLearning.Stacking.Predict_From_Metadataset(
+  sequences,
+  gapPositions = c(125),
+  analysisType = "AAIndex",
+  aaIndexType = "physicochemical",
+  normalized = T,
+  ml.metadata,
+  colNames.from,
+  colNames.to,
+  outcomeLabelName,
+  sourceLabelName,
+  pp = "external",
+  pp.by.sequence,
+  pp.by.patient,
+  modelList,
+  model.stack
+)
 }
 \arguments{
 \item{X}{Either a dataframe or a set of sequences.}
@@ -53,4 +68,7 @@ machineLearning.Stacking.Predict_From_Metadataset(sequences,
 \item{pp.by.sequence}{(Optional) Users can provide their own pre-processing function (per sequence).}
 
 \item{pp.by.patient}{(Optional) Users can provide their own pre-processing function (per patient).}
+}
+\description{
+Predict HAND status using pre-trained classifiers.
 }

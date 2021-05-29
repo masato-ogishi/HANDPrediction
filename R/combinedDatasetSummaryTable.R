@@ -32,25 +32,3 @@ combinedDatasetSummaryTable <- function(
   return(tableOne)
 }
 
-# Export the summary table in a Word format
-#' @title Export the summary table in a Word format
-#' @param tableOneDF A "tableone" object returned by the combinedDatasetSummaryTable function.
-#' @param outputFileName A file name for the output Word file.
-#' @importFrom dplyr %>%
-#' @importFrom ReporteRs docx
-#' @importFrom ReporteRs addFlexTable
-#' @importFrom ReporteRs FlexTable
-#' @importFrom ReporteRs cellProperties
-#' @importFrom ReporteRs textBold
-#' @importFrom ReporteRs writeDoc
-#' @export
-#' @rdname combinedDatasetSummaryTable
-combinedDatasetSummaryTable.Export <- function(tableOneDF, outputFileName="tableOne.docx"){
-  docx( ) %>%
-    addFlexTable(tableOneDF %>%
-                   FlexTable(header.cell.props=cellProperties(background.color="#003366"),
-                             header.text.props=textBold(color="white"),
-                             add.rownames=T)) %>%
-    writeDoc(file=outputFileName)
-  ## Adopted from: http://www.r-bloggers.com/table-1-and-the-characteristics-of-study-population/
-}

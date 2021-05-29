@@ -4,10 +4,17 @@
 \alias{machineLearning.FeatureImportanceAnalysis}
 \title{Screen important features.}
 \usage{
-machineLearning.FeatureImportanceAnalysis(ml.data, outcomeLabelName, modelList,
-  topN = 20, pThreshold = 0.05, removedVars = c(),
-  outputFileName.DOCX = "FeatureImportance.docx", xLabel = NULL,
-  yLabel = NULL, colorSet)
+machineLearning.FeatureImportanceAnalysis(
+  ml.data,
+  outcomeLabelName,
+  modelList,
+  topN = 20,
+  pThreshold = 0.05,
+  removedVars = c(),
+  xLabel = NULL,
+  yLabel = NULL,
+  colorSet
+)
 }
 \arguments{
 \item{ml.data}{A machine-learning-ready dataframe returned by the machineLearning.DataFormat function.}
@@ -22,11 +29,12 @@ machineLearning.FeatureImportanceAnalysis(ml.data, outcomeLabelName, modelList,
 
 \item{removedVars}{(Optional) Feature names that should be removed manually.}
 
-\item{outputFileName.DOCX}{A file name of a summary table in a Word format.}
+\item{xLabel}{(Optional) An x-axis label for the violin plot.}
 
-\item{xLabel}{An x-axis label for the violin plot.}
-
-\item{yLabel}{A y-axis label for the violin plot.}
+\item{yLabel}{(Optional) A y-axis label for the violin plot.}
 
 \item{colorSet}{The color set to be used.}
+}
+\description{
+Screen important features.
 }

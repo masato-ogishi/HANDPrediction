@@ -4,8 +4,12 @@
 \alias{machineLearning.StepwiseFeatureReduction}
 \title{Stepwise feature reduction.}
 \usage{
-machineLearning.StepwiseFeatureReduction(featureSet, ml.data, outcomeLabelName,
-  ...)
+machineLearning.StepwiseFeatureReduction(
+  featureSet,
+  ml.data,
+  outcomeLabelName,
+  ...
+)
 }
 \arguments{
 \item{featureSet}{A set of features as a starting point. Can be either a character vector or a list.}
@@ -15,4 +19,7 @@ machineLearning.StepwiseFeatureReduction(featureSet, ml.data, outcomeLabelName,
 \item{outcomeLabelName}{A column name for neurological outcomes.}
 
 \item{...}{Parameters for the machineLearning.Comparison.Bootstrap function.}
+}
+\description{
+Stepwise feature reduction.
 }

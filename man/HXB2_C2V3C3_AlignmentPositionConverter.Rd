@@ -4,8 +4,11 @@
 \alias{HXB2_C2V3C3_AlignmentPositionConverter}
 \title{Convert the positions of the input alignment to the positions in HXB2 env reference sequence.}
 \usage{
-HXB2_C2V3C3_AlignmentPositionConverter(startPosition = 197,
-  endPosition = 384, gapPositions = c(125))
+HXB2_C2V3C3_AlignmentPositionConverter(
+  startPosition = 197,
+  endPosition = 384,
+  gapPositions = c(125)
+)
 }
 \arguments{
 \item{startPosition}{A position from which the C2 region starts; a default is 197 in the HXB2 sequence.}
@@ -13,4 +16,7 @@ HXB2_C2V3C3_AlignmentPositionConverter(startPosition = 197,
 \item{endPosition}{A position at which the C3 region ends; a default is 384 in the HXB2 sequence.}
 
 \item{gapPositions}{Gap positions; a default is c(125), which is consistent with the alignment used in the original study. Users should carefully examine their alignments before setting this parameter.}
+}
+\description{
+Convert the positions of the input alignment to the positions in HXB2 env reference sequence.
 }

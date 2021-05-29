@@ -6,14 +6,31 @@
 \alias{machineLearning.Comparison.Bootstrap}
 \title{Compare multiple machine learning algorithms.}
 \usage{
-machineLearning.Comparison.default(trainingData, testingData, outcomeLabelName,
-  algorithmList, algorithmLabelList, trainControlOptions,
-  stackingAlgorithm = "xgbTree", tuneL = 3)
+machineLearning.Comparison.default(
+  trainingData,
+  testingData,
+  outcomeLabelName,
+  algorithmList,
+  algorithmLabelList,
+  trainControlOptions,
+  stackingAlgorithm = "xgbTree",
+  tuneL = 3
+)
 
-machineLearning.Comparison(ml.data, ml.metadata, holdoutTrainingRatio = 0.8,
-  outcomeLabelName, patientIDLabelName, algorithmList, algorithmLabelList,
-  trainControlOptions, stackingAlgorithm = "xgbTree", tuneL = 3,
-  outputFileName.TXT = NULL, seed = 123456789)
+machineLearning.Comparison(
+  ml.data,
+  ml.metadata,
+  holdoutTrainingRatio = 0.8,
+  outcomeLabelName,
+  patientIDLabelName,
+  algorithmList,
+  algorithmLabelList,
+  trainControlOptions,
+  stackingAlgorithm = "xgbTree",
+  tuneL = 3,
+  outputFileName.TXT = NULL,
+  seed = 123456789
+)
 
 machineLearning.Comparison.Bootstrap(..., seedList = 1:10)
 }
@@ -49,4 +66,7 @@ machineLearning.Comparison.Bootstrap(..., seedList = 1:10)
 \item{...}{Parameters for the machineLearning.Comparison function.}
 
 \item{seedList}{A set of random seeds.}
+}
+\description{
+Compare multiple machine learning algorithms.
 }

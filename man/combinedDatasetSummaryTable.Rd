@@ -2,17 +2,16 @@
 % Please edit documentation in R/combinedDatasetSummaryTable.R
 \name{combinedDatasetSummaryTable}
 \alias{combinedDatasetSummaryTable}
-\alias{combinedDatasetSummaryTable.Export}
 \title{Generate a summary table from the combined data}
 \usage{
-combinedDatasetSummaryTable(combinedDataset,
+combinedDatasetSummaryTable(
+  combinedDataset,
   strataColName = "Clinical.Status",
-  varColNamesString = "Patient.Sex|Georegion|Sample.Tissue.Category|Viral.load|CD4.count|Number.of.patient.seqs",
+ 
+    varColNamesString = "Patient.Sex|Georegion|Sample.Tissue.Category|Viral.load|CD4.count|Number.of.patient.seqs",
   factorColNamesString = "Patient.Sex|Georegion|Sample.Tissue.Category",
-  nonNormalColNameString = "Viral.load|CD4.count|Number.of.patient.seqs")
-
-combinedDatasetSummaryTable.Export(tableOneDF,
-  outputFileName = "tableOne.docx")
+  nonNormalColNameString = "Viral.load|CD4.count|Number.of.patient.seqs"
+)
 }
 \arguments{
 \item{combinedDataset}{A combined dataframe returned by the dataImportAndCombine function.}
@@ -24,8 +23,7 @@ combinedDatasetSummaryTable.Export(tableOneDF,
 \item{factorColNamesString}{A string representing the column names of categorical (factorized) variables in a summary table.}
 
 \item{nonNormalColNameString}{A string representing the column names of numerical variables not normally distributed in a summary table.}
-
-\item{tableOneDF}{A "tableone" object returned by the combinedDatasetSummaryTable function.}
-
-\item{outputFileName}{A file name for the output Word file.}
+}
+\description{
+Generate a summary table from the combined data
 }

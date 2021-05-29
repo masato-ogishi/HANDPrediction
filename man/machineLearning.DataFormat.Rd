@@ -4,9 +4,17 @@
 \alias{machineLearning.DataFormat}
 \title{Convert the sequence-derived numerical matrix into a machine-learning-ready dataframe.}
 \usage{
-machineLearning.DataFormat(ml.matrix, ml.metadata, colNames.from,
-  colNames.to = colNames.from, outcomeLabelName = NULL, sourceLabelName,
-  pp = "internal", pp.by.sequence = NULL, pp.by.patient = NULL)
+machineLearning.DataFormat(
+  ml.matrix,
+  ml.metadata,
+  colNames.from,
+  colNames.to = colNames.from,
+  outcomeLabelName = NULL,
+  sourceLabelName,
+  pp = "internal",
+  pp.by.sequence = NULL,
+  pp.by.patient = NULL
+)
 }
 \arguments{
 \item{ml.matrix}{A numerical matrix returned by the machineLearning.Matrix function.}
@@ -26,4 +34,7 @@ machineLearning.DataFormat(ml.matrix, ml.metadata, colNames.from,
 \item{pp.by.sequence}{(Optional) Users can provide their own pre-processing function (per sequence).}
 
 \item{pp.by.patient}{(Optional) Users can provide their own pre-processing function (per patient).}
+}
+\description{
+Convert the sequence-derived numerical matrix into a machine-learning-ready dataframe.
 }

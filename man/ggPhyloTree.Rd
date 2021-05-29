@@ -5,11 +5,23 @@
 \alias{ggPhyloTree.Mirror}
 \title{Phylogenetic tree colored with metadata.}
 \usage{
-ggPhyloTree(tree.newick.file, combinedDataset, groupLabelName, groupVarNames,
-  colorSet, tipped = F)
+ggPhyloTree(
+  tree.newick.file,
+  combinedDataset,
+  groupLabelName,
+  groupVarNames,
+  colorSet,
+  tipped = F
+)
 
-ggPhyloTree.Mirror(tree.newick.file, combinedDataset, groupLabelNames,
-  groupVarNamesList, colorSetList, tipped = F)
+ggPhyloTree.Mirror(
+  tree.newick.file,
+  combinedDataset,
+  groupLabelNames,
+  groupVarNamesList,
+  colorSetList,
+  tipped = F
+)
 }
 \arguments{
 \item{tree.newick.file}{A phylotree file name in a Newick format.}
@@ -29,4 +41,7 @@ ggPhyloTree.Mirror(tree.newick.file, combinedDataset, groupLabelNames,
 \item{groupVarNamesList}{A list of the names of the categories of the grouping variable.}
 
 \item{colorSetList}{A list containing the color sets to be used.}
+}
+\description{
+Phylogenetic tree colored with metadata.
 }
