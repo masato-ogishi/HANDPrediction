@@ -101,10 +101,12 @@ machineLearning.Comparison <- function(ml.data, ml.metadata, holdoutTrainingRati
   set.seed(seed)
 
   # Prepare datasets for model training and model validation
-  holdoutIDs.DF <- dplyr::select_(ml.metadata, outcomeLabelName, patientIDLabelName) %>% unique.data.frame()
+  holdoutIDs.DF <- dplyr::select(ml.metadata, outcomeLabelName, patientIDLabelName) %>% unique.data.frame()
   holdoutIDs <- caret::createDataPartition(holdoutIDs.DF[[outcomeLabelName]], p=holdoutTrainingRatio, list=F)
   patientIDs_training <- holdoutIDs.DF[holdoutIDs,][[patientIDLabelName]]
   patientIDs_testing <- holdoutIDs.DF[-holdoutIDs,][[patientIDLabelName]]
+  if(purrr::is_empty(patientIDs_training)) stop("No data allocated for the training subdataset. Use a higher value for holdoutTrainingRatio, and consider including more patients' data.")
+  if(purrr::is_empty(patientIDs_testing)) stop("No data allocated for the testing subdataset. Use a lower value for holdoutTrainingRatio, and consider including more patients' data.")
   rowIDs.DF_training <- ml.metadata %>%
     dplyr::mutate(RowID=row.names(.)) %>%
     dplyr::mutate_(PatID=patientIDLabelName) %>%
